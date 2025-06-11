@@ -1,4 +1,4 @@
-class Rect {
+export class QuadTree_Rect {
     constructor(x, y, width, height) {
         this.x = x;
         this.y = y;
@@ -7,7 +7,7 @@ class Rect {
     }
 }
 
-class QuadTree {
+export class QuadTree {
     constructor(boundary, capacity) {
         this.boundary = boundary
         this.capacity = capacity

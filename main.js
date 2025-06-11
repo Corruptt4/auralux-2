@@ -1,4 +1,6 @@
-import { settings } from "./MODULES/global"
+import { settings } from "./MODULES/global.js";
+import { Star } from "./MODULES/ENTITIES/star.js";
+import { Unit } from "./MODULES/ENTITIES/unit.js";
 
 
 export const cns = document.getElementById("canvas"),

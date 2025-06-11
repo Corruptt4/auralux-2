@@ -1,6 +1,6 @@
 import { ctx } from "../../main.js"
 
-class Unit {
+export class Unit {
     constructor(x, y, team, color) {
         this.x = x;
         this.y = y;
