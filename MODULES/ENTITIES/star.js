@@ -139,3 +139,9 @@ export class Star {
         }
     }
 }
+
+export class StarForgePlaceholder {
+    constructor(x, y, level) {
+        this.x = x
+    }
+}
