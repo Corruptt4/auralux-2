@@ -54,7 +54,7 @@ export class Star {
             y: 0,
         }
         this.target = {
-            x: x+60,
+            x: x,
             y: y
         }
         this.maxLevel = 3

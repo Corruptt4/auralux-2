@@ -13,7 +13,7 @@ export let flashes = []
 let worldMouseX = null,
       worldMouseY = null
 
-let star = new Star(0, 0, 3, "rgb(0, 0, 205)", playerTeam)
+let star = new Star(0, 0, 3, "rgb(0, 0, 205)", 1)
 globalStars.set(star.id, star)
 
 const set = settings
@@ -39,8 +39,8 @@ cns.addEventListener('mousemove', function (event) {
     const halfMap = set.MAP_SIZE / 2;
     const clampedX = Math.max(-halfMap, Math.min(halfMap, worldX));
     const clampedY = Math.max(-halfMap, Math.min(halfMap, worldY));
-    worldMouseX = clampedX
-    worldMouseY = clampedY
+    worldMouseX = clampedX/camera.zoom
+    worldMouseY = clampedY/camera.zoom
 });
 document.addEventListener("mousedown", (e) => {
     e.preventDefault()
@@ -52,10 +52,20 @@ document.addEventListener("mousedown", (e) => {
                 unit.mouseSelectedTarget = true
             }
         })
+        globalStars.forEach((star) => {
+            if (star.team == playerTeam && star.isSelected) {
+                star.target.x = worldMouseX
+                star.target.y = worldMouseY
+                star.moving = true
+            }
+        })
     }
     if (e.button == 0) {
         globalUnits.forEach((unit) => {
             if (unit.isSelected) unit.isSelected = false
+        })
+        globalStars.forEach((star) => {
+            if (star.team == playerTeam) star.isSelected = false
         })
     }
 })
@@ -77,6 +87,11 @@ setInterval(() => {
     if (keys[84]) {
         globalUnits.forEach((unit) => {
             if (unit.team == playerTeam) unit.isSelected = true
+        })
+    }
+    if (keys[89]) {
+        globalStars.forEach((star) => {
+            if (star.team == playerTeam) star.isSelected = true
         })
     }
     globalStars.forEach((star) => {
