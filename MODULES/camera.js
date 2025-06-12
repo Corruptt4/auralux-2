@@ -15,6 +15,7 @@ export class Camera {
         this.zoom2 += (this.zoom - this.zoom2) * 0.05
     }
     apply() {
+        this.zoom = Math.max(0.1, Math.min(5, this.zoom))
         ctx.translate(cns.width/2, cns.height/2)
         ctx.scale(this.zoom2, this.zoom2)
         ctx.translate(-this.x2, -this.y2)

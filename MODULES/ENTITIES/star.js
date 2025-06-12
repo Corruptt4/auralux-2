@@ -11,7 +11,7 @@ export class PlasmaFlash {
         this.alpha = 0.5
     }
     update() {
-        this.size += (this.maxSize - this.size) * 0.02
+        this.size += (this.maxSize - this.size) * 0.2
         this.alpha = 0.5 - 0.5 * (this.size/this.maxSize)
         if (this.alpha <= 0.03) {
             flashes.splice(flashes.indexOf(this), 1)
@@ -140,8 +140,41 @@ export class Star {
     }
 }
 
-export class StarForgePlaceholder {
-    constructor(x, y, level) {
-        this.x = x
+export class StarFusePlaceholder {
+    constructor(x, y, level, team, color) {
+        this.x = x;
+        this.y = y;
+        this.team = team;
+        this.color = color
+        this.delete = false;
+        this.neededToFuse = 100;
+        this.level = level;
+        this.size = Math.ceil(35 * Math.pow(1.4, (this.level-1).toFixed(2)))
+        this.segments = 15 
+        this.segmentWidth = Math.PI * 2 / this.segments * 0.6
+        this.rotateANG = 0
+        this.fusing = false;
+        this.spawning = false;
+    }
+    upd() {
+        this.rotateANG += 0.03
+    }
+    draw() {
+        for (let i = 0; i < this.segments; i++) {
+            let startANG = (i / this.segments) * Math.PI * 2
+            let endANG = startANG + this.segmentWidth
+            ctx.beginPath()
+            ctx.strokeStyle = "white"
+            ctx.lineWidth = 0.3
+            ctx.arc(this.x, this.y, this.size, startANG+this.rotateANG, endANG+this.rotateANG)
+            ctx.stroke()
+            ctx.closePath()
+        }
+        ctx.beginPath()
+        ctx.strokeStyle = this.color
+        ctx.lineWidth = 6
+        ctx.arc(this.x, this.y, this.size*1.5, 0, Math.PI * 2 * (this.inRangeUnits/this.neededToFuse))
+        ctx.stroke()
+        ctx.closePath()
     }
 }

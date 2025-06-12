@@ -14,6 +14,7 @@ export class Unit {
         this.idleTick = 80
         this.size = 6
         this.segments = 3
+        this.isInFusion;
         this.segmentWidth = Math.PI * 2 / this.segments * 0.6
         this.isSelected = false;
         this.target = {
