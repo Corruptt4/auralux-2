@@ -20,6 +20,7 @@ let stars = [
 ]
 
 stars.forEach((star) => {
+    if (star.team != playerTeam) star.AIControl = true;
     globalStars.set(star.id, star)
 })
 

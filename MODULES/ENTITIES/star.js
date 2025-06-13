@@ -127,7 +127,7 @@ export class Star {
                 }
             })
             this.aiAggressiveness = Math.max(1, inRange.length/100)
-            if (Math.random() <= this.aiAggressiveness) {
+            if (Math.random() < this.aiAggressiveness) {
 
                 /**
                  * inRange.forEach((unit) => {
@@ -137,16 +137,18 @@ export class Star {
                 })
                  */
                inRange.forEach((unit) => {
-                    if (Math.random() < 0.01 && !this.unitsToAbsorb.includes(unit)) {
+                    if (Math.random() < 0.01 && !this.unitsToAbsorb.includes(unit) && this.level < 3) {
                             unit.selected = true
                             unit.target.x = this.x
+                            unit.mouseSelectedTarget = true
                             unit.target.y = this.y
                             this.unitsToAbsorb.push(unit)
                     } 
-                    if (Math.random() < 0.5 && !this.unitsToAbsorb.includes(unit) && unit.speed <= 0.04) {
+                    if (Math.random() < 0.5 && !this.unitsToAbsorb.includes(unit) && unit.speed <= 0.1) {
                             let randAng = Math.PI * 2 * Math.random()
-                            unit.target.x = this.x + this.size*8 * Math.cos(randAng)
-                            unit.target.y = this.y + this.size*8 * Math.sin(randAng)
+                            unit.mouseSelectedTarget = true
+                            unit.target.x = this.x + this.size*3 * Math.cos(randAng)
+                            unit.target.y = this.y + this.size*3 * Math.sin(randAng)
                     }
                })
             }
