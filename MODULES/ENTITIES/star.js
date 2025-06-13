@@ -1,4 +1,4 @@
-import { ctx, globalUnits, frictionFactor, flashes } from "../../main.js"
+import { ctx, globalUnits, frictionFactor, flashes, playerTeam } from "../../main.js"
 import { Unit } from "./unit.js";
 
 export class PlasmaFlash {
@@ -34,11 +34,13 @@ export class Star {
         this.y = y;
         this.team = team;
         this.level = level;
+        this.AIControl = (team != playerTeam)
         this.speed = 0.3;
         this.xp = 0;
         this.unitsToAbsorb = []
         this.levelUpXP = Math.ceil(40 * Math.pow(1.5, level-1))
         this.color = color;
+        this.flashColor = color;
         this.health = Math.ceil(150 * (Math.pow(1.5, (level-1))).toFixed(2));
         this.size = Math.ceil(35 * (Math.pow(1.35, (level-1))).toFixed(2));
         this.regularSize = Math.ceil(35 * (Math.pow(1.4, (level-1))).toFixed(2));
@@ -52,6 +54,7 @@ export class Star {
         this.segments = 30 
         this.segmentWidth = Math.PI * 2 / this.segments * 0.6
         this.isSelected = false;
+        this.aiAggressiveness = 0
         this.velocity = {
             x: 0,
             y: 0,
@@ -85,7 +88,7 @@ export class Star {
                 this.size = this.regularSize
                 this.flashing = false
             }, 100)
-            let flash = new PlasmaFlash(this.x, this.y, this.size, this.size*3, this.color)
+            let flash = new PlasmaFlash(this.x, this.y, this.size, this.size*3, this.flashColor)
             flashes.push(flash)
             for (let i = 0; i < this.level; i++) {
                 let ang = (i * (360 / this.level)) * (Math.PI / 180)
@@ -108,6 +111,45 @@ export class Star {
         }
         if (this.level >= 3) {
             this.xp = 0
+        }
+
+        if (this.AIControl) {
+            let inRange = []
+            globalUnits.forEach((unit) => {
+                if (unit.team == this.team) {
+                    let dx = unit.x - this.x
+                    let dy = unit.y - this.y
+                    let dist = dx*dx+dy*dy
+                    let range = this.size*4
+                    if (dist < Math.pow(range, 2)) {
+                        inRange.push(unit)
+                    }
+                }
+            })
+            this.aiAggressiveness = Math.max(1, inRange.length/100)
+            if (Math.random() <= this.aiAggressiveness) {
+
+                /**
+                 * inRange.forEach((unit) => {
+                    let randAng = Math.PI * 2 * Math.random()
+                    unit.x = this.x + this.size*2 * Math.cos(randAng)
+                    unit.y = this.y + this.size*2 * Math.sin(randAng)
+                })
+                 */
+               inRange.forEach((unit) => {
+                    if (Math.random() < 0.01 && !this.unitsToAbsorb.includes(unit)) {
+                            unit.selected = true
+                            unit.target.x = this.x
+                            unit.target.y = this.y
+                            this.unitsToAbsorb.push(unit)
+                    } 
+                    if (Math.random() < 0.5 && !this.unitsToAbsorb.includes(unit) && unit.speed <= 0.04) {
+                            let randAng = Math.PI * 2 * Math.random()
+                            unit.target.x = this.x + this.size*8 * Math.cos(randAng)
+                            unit.target.y = this.y + this.size*8 * Math.sin(randAng)
+                    }
+               })
+            }
         }
     }
     move() {
@@ -149,25 +191,27 @@ export class Star {
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
         ctx.fill()
         ctx.closePath()
-        if (this.isSelected) {
-            this.rotateANG += 0.04
-            for (let i = 0; i < this.segments; i++) {
-                let startANG = (i / this.segments) * Math.PI * 2
-                let endANG = startANG + this.segmentWidth
-                ctx.beginPath()
-                ctx.strokeStyle = "white"
-                ctx.lineWidth = 0.3
-                ctx.arc(this.x, this.y, this.size*1.3, startANG+this.rotateANG, endANG+this.rotateANG)
-                ctx.stroke()
-                ctx.closePath()
+        if (this.team == playerTeam)  {
+            if (this.isSelected) {
+                this.rotateANG += 0.04
+                for (let i = 0; i < this.segments; i++) {
+                    let startANG = (i / this.segments) * Math.PI * 2
+                    let endANG = startANG + this.segmentWidth
+                    ctx.beginPath()
+                    ctx.strokeStyle = "white"
+                    ctx.lineWidth = 0.3
+                    ctx.arc(this.x, this.y, this.size*1.3, startANG+this.rotateANG, endANG+this.rotateANG)
+                    ctx.stroke()
+                    ctx.closePath()
+                }
             }
+            ctx.beginPath()
+            ctx.strokeStyle = this.color
+            ctx.lineWidth = 0.5
+            ctx.arc(this.x, this.y, this.size * 1.1, 0, Math.PI * 2 * (this.xp/this.levelUpXP))
+            ctx.stroke()
+            ctx.closePath()
         }
-        ctx.beginPath()
-        ctx.strokeStyle = this.color
-        ctx.lineWidth = 0.5
-        ctx.arc(this.x, this.y, this.size * 1.1, 0, Math.PI * 2 * (this.xp/this.levelUpXP))
-        ctx.stroke()
-        ctx.closePath()
     }
 }
 
@@ -192,9 +236,9 @@ export class StarFusePlaceholder {
     }
     draw() {
         for (let i = 0; i < this.segments; i++) {
+            ctx.beginPath()
             let startANG = (i / this.segments) * Math.PI * 2
             let endANG = startANG + this.segmentWidth
-            ctx.beginPath()
             ctx.strokeStyle = "white"
             ctx.lineWidth = 0.3
             ctx.arc(this.x, this.y, this.size, startANG+this.rotateANG, endANG+this.rotateANG)

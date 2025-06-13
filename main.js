@@ -2,7 +2,7 @@ import { settings } from "./MODULES/global.js";
 import { Star, StarFusePlaceholder } from "./MODULES/ENTITIES/star.js";
 import { Camera } from "./MODULES/camera.js"
 
-let playerTeam = 1
+export let playerTeam = 1
 export const cns = document.getElementById("canvas"),
                           ctx = cns.getContext("2d"),
                           frictionFactor = 0.94
@@ -14,8 +14,14 @@ export let starFuses = []
 let worldMouseX = null,
       worldMouseY = null
 
-let star = new Star(0, 0, 1, "rgb(0, 0, 205)", 1)
-globalStars.set(star.id, star)
+let stars = [
+    new Star(0, 0, 1, "rgb(0, 0, 205)", 1),
+    new Star(0, 350, 1, "rgb(205, 0, 0)", 2)
+]
+
+stars.forEach((star) => {
+    globalStars.set(star.id, star)
+})
 
 const set = settings
 let camera = new Camera(0, 0)
@@ -182,17 +188,17 @@ function render() {
     cns.height = window.innerHeight
 
     camera.apply()
+    flashes.forEach((flash) => {
+        flash.draw()
+    })
+    starFuses.forEach((starFusing) => {
+        starFusing.draw()
+    })
     globalStars.forEach((star) => {
         star.draw()
     })
     globalUnits.forEach((unit) => {
         unit.draw()
-    })
-    starFuses.forEach((starFusing) => {
-        starFusing.draw()
-    })
-    flashes.forEach((flash) => {
-        flash.draw()
     })
 
     requestAnimationFrame(render)
