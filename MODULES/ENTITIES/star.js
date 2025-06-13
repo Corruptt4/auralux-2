@@ -11,9 +11,9 @@ export class PlasmaFlash {
         this.alpha = 0.5
     }
     update() {
-        this.size += (this.maxSize - this.size) * 0.2
+        this.size += (this.maxSize - this.size) * 0.12
         this.alpha = 0.5 - 0.5 * (this.size/this.maxSize)
-        if (this.alpha <= 0.03) {
+        if (this.alpha <= 0.01) {
             flashes.splice(flashes.indexOf(this), 1)
         }
     }
@@ -22,7 +22,7 @@ export class PlasmaFlash {
         ctx.globalAlpha = 0.5 - 0.5 * (this.size/this.maxSize)
         ctx.strokeStyle = this.color
         ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI)
-        ctx.lineWidth = 50
+        ctx.lineWidth = 50 - 50 * (this.size/this.maxSize)
         ctx.stroke()
         ctx.globalAlpha = 1
         ctx.closePath()
@@ -35,9 +35,12 @@ export class Star {
         this.team = team;
         this.level = level;
         this.speed = 0.3;
+        this.xp = 0;
+        this.unitsToAbsorb = []
+        this.levelUpXP = Math.ceil(40 * Math.pow(1.5, level-1))
         this.color = color;
         this.health = Math.ceil(150 * (Math.pow(1.5, (level-1))).toFixed(2));
-        this.size = Math.ceil(35 * (Math.pow(1.4, (level-1))).toFixed(2));
+        this.size = Math.ceil(35 * (Math.pow(1.35, (level-1))).toFixed(2));
         this.regularSize = Math.ceil(35 * (Math.pow(1.4, (level-1))).toFixed(2));
         this.maxFlashSize = Math.ceil(40 * (Math.pow(1.4, (level-1))).toFixed(2));
         this.spawnTick = 80 * (Math.pow(0.85, (level-1))).toFixed(2);
@@ -59,6 +62,14 @@ export class Star {
         }
         this.maxLevel = 3
         this.rotateANG = 0
+    }
+
+    absorb(unit) {
+        if (this.level < 3) {
+            this.xp += unit.xp
+            this.unitsToAbsorb.splice(this.unitsToAbsorb.indexOf(unit), 1)
+            globalUnits.delete(unit.id)
+        }
     }
 
     update() {
@@ -83,6 +94,20 @@ export class Star {
                 unit.mouseSelectedTarget = true;
                 globalUnits.set(unit.id, unit)
             }
+        }
+        if (this.xp >= this.levelUpXP) {
+            this.xp -= this.levelUpXP
+            this.level++
+            this.levelUpXP = Math.ceil(40 * Math.pow(1.5, this.level-1))
+            this.health = Math.ceil(150 * (Math.pow(1.5, (this.level-1))).toFixed(2));
+            this.size = Math.ceil(35 * (Math.pow(1.35, (this.level-1))).toFixed(2));
+            this.regularSize = Math.ceil(35 * (Math.pow(1.4, (this.level-1))).toFixed(2));
+            this.maxFlashSize = Math.ceil(40 * (Math.pow(1.4, (this.level-1))).toFixed(2));
+            this.spawnTick = 80 * (Math.pow(0.85, (this.level-1))).toFixed(2);
+            this.regularSpawnTick = 80 * (Math.pow(0.85, (this.level-1))).toFixed(2);
+        }
+        if (this.level >= 3) {
+            this.xp = 0
         }
     }
     move() {
@@ -137,6 +162,12 @@ export class Star {
                 ctx.closePath()
             }
         }
+        ctx.beginPath()
+        ctx.strokeStyle = this.color
+        ctx.lineWidth = 0.5
+        ctx.arc(this.x, this.y, this.size * 1.1, 0, Math.PI * 2 * (this.xp/this.levelUpXP))
+        ctx.stroke()
+        ctx.closePath()
     }
 }
 

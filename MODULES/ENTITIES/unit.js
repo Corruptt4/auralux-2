@@ -13,6 +13,7 @@ export class Unit {
         this.mouseSelectedTarget = false
         this.idleTick = 80
         this.size = 6
+        this.xp = 1.5
         this.segments = 3
         this.isInFusion;
         this.segmentWidth = Math.PI * 2 / this.segments * 0.6

@@ -14,7 +14,7 @@ export let starFuses = []
 let worldMouseX = null,
       worldMouseY = null
 
-let star = new Star(0, 0, 3, "rgb(0, 0, 205)", 1)
+let star = new Star(0, 0, 1, "rgb(0, 0, 205)", 1)
 globalStars.set(star.id, star)
 
 const set = settings
@@ -69,6 +69,19 @@ document.addEventListener("mousedown", (e) => {
                 star.target.y = worldMouseY
                 star.moving = true
             }
+            if (star.team == playerTeam) {
+                let dx = worldMouseX - star.x
+                let dy = worldMouseY - star.y
+                let dist = dx*dx+dy*dy
+                let range = star.size**2
+                if (dist < range) {
+                    globalUnits.forEach((unit) => {
+                         if (unit.team == playerTeam && unit.isSelected) {
+                            star.unitsToAbsorb.push(unit)
+                        }
+                    })
+                }
+            }
         })
     }
     if (e.button == 0) {
@@ -108,6 +121,16 @@ setInterval(() => {
     globalStars.forEach((star) => {
         star.update()
         star.move()
+
+        star.unitsToAbsorb.forEach((unit) => {
+            let dx = unit.x-star.x
+            let dy = unit.y-star.y
+            let dist = dx*dx+dy*dy
+            let range = (star.size+unit.size)**2
+            if (dist < range && star.level < 3) {
+                star.absorb(unit)
+            }
+        })
     })
     globalUnits.forEach((unit) => {
         unit.move()
