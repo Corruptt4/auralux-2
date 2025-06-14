@@ -15,9 +15,8 @@ let worldMouseX = null,
       worldMouseY = null
 
 let stars = [
-    new Star(0, 0, 3, "rgb(0, 0, 205)", 1),
-    new Star(0, 350, 3, "rgb(205, 0, 0)", 2),
-    new Star (350, 175, 3, "rgb(0, 205, 0)", 3)
+    new Star(1500, -1500, 3, "rgb(0, 0, 205)", 1),
+    new Star(-1500, 1500, 3, "rgb(205, 0, 0)", 2)
 ]
 
 stars.forEach((star) => {
@@ -26,7 +25,7 @@ stars.forEach((star) => {
 })
 
 const set = settings
-let camera = new Camera(0, 0)
+let camera = new Camera(stars[0].x, stars[0].y)
 let keys = {}
 let canSpawnFuse = true
 

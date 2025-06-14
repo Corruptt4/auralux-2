@@ -118,6 +118,7 @@ export class Star {
 
         if (this.AIControl) {
             let inRange = []
+            let sentToFuse = []
             globalUnits.forEach((unit) => {
                 if (unit.team == this.team && !unit.sentToFuse) {
                     let dx = unit.x - this.x
@@ -141,15 +142,23 @@ export class Star {
             }
             if (this.fuse) {
                 this.AIIsFusing = false
-                inRange.forEach((unit) => {
+                inRange.forEach((unit, index) => {
+                    unit.sentToFuse = true
+                    sentToFuse.push(unit);
+                    inRange.splice(index, 1)
+                })
+                sentToFuse.forEach((unit) => {
                     unit.target.x = this.fuse.x
                     unit.target.y = this.fuse.y
                     unit.mouseSelectedTarget = true
-                    unit.sentToFuse = true
                 })
-                inRange = inRange.filter((unit) => unit.sentToFuse)
                 if (this.fuse.inRangeUnits >= 100) {
                     this.fuse = null
+                    sentToFuse.forEach((unit, index) => {
+                        unit.sentToFuse = false
+                        inRange.push(unit)
+                        sentToFuse.splice(index, 1)
+                    })
                 }
             }
             this.aiAggressiveness = Math.max(1, inRange.length/20)
