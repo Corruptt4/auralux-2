@@ -1,5 +1,6 @@
-import { ctx, globalUnits, frictionFactor, flashes, playerTeam } from "../../main.js"
+import { ctx, globalUnits, frictionFactor, flashes, playerTeam, starFuses } from "../../main.js"
 import { Unit } from "./unit.js";
+import { functions } from "../global.js"
 
 export class PlasmaFlash {
     constructor(x, y, size, maxSize, color) {
@@ -54,6 +55,8 @@ export class Star {
         this.segments = 30 
         this.segmentWidth = Math.PI * 2 / this.segments * 0.6
         this.isSelected = false;
+        this.AIIsFusing = false;
+        this.fuse = null
         this.aiAggressiveness = 0
         this.velocity = {
             x: 0,
@@ -116,17 +119,40 @@ export class Star {
         if (this.AIControl) {
             let inRange = []
             globalUnits.forEach((unit) => {
-                if (unit.team == this.team) {
+                if (unit.team == this.team && !unit.sentToFuse) {
                     let dx = unit.x - this.x
                     let dy = unit.y - this.y
                     let dist = dx*dx+dy*dy
-                    let range = this.size*4
+                    let range = this.size*15
                     if (dist < Math.pow(range, 2)) {
                         inRange.push(unit)
                     }
                 }
             })
-            this.aiAggressiveness = Math.max(1, inRange.length/100)
+            if (inRange.length >= 100) {
+                this.AIIsFusing = true
+            }
+            if (this.AIIsFusing && this.fuse == null) {
+                let randomAngle = functions.randomAngle()
+                let x = this.x + this.size * 2 * Math.cos(randomAngle)
+                let y = this.y + this.size * 2 * Math.sin(randomAngle)
+                this.fuse = new StarFusePlaceholder(x, y, 4, this.team, this.color)
+                starFuses.push(this.fuse)
+            }
+            if (this.fuse) {
+                this.AIIsFusing = false
+                inRange.forEach((unit) => {
+                    unit.target.x = this.fuse.x
+                    unit.target.y = this.fuse.y
+                    unit.mouseSelectedTarget = true
+                    unit.sentToFuse = true
+                })
+                inRange = inRange.filter((unit) => unit.sentToFuse)
+                if (this.fuse.inRangeUnits >= 100) {
+                    this.fuse = null
+                }
+            }
+            this.aiAggressiveness = Math.max(1, inRange.length/20)
             if (Math.random() < this.aiAggressiveness) {
 
                 /**
@@ -144,7 +170,7 @@ export class Star {
                             unit.target.y = this.y
                             this.unitsToAbsorb.push(unit)
                     } 
-                    if (Math.random() < 0.5 && !this.unitsToAbsorb.includes(unit) && unit.speed <= 0.1) {
+                    if (Math.random() < 0.5 && !this.unitsToAbsorb.includes(unit) && unit.speed <= 0.1 && !this.AIIsFusing) {
                             let randAng = Math.PI * 2 * Math.random()
                             unit.mouseSelectedTarget = true
                             unit.target.x = this.x + this.size*3 * Math.cos(randAng)

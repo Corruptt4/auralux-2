@@ -16,6 +16,7 @@ export class Unit {
         this.xp = 1.5
         this.segments = 3
         this.isInFusion;
+        this.sentToFuse = false;
         this.segmentWidth = Math.PI * 2 / this.segments * 0.6
         this.isSelected = false;
         this.target = {

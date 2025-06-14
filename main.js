@@ -15,8 +15,9 @@ let worldMouseX = null,
       worldMouseY = null
 
 let stars = [
-    new Star(0, 0, 1, "rgb(0, 0, 205)", 1),
-    new Star(0, 350, 1, "rgb(205, 0, 0)", 2)
+    new Star(0, 0, 3, "rgb(0, 0, 205)", 1),
+    new Star(0, 350, 3, "rgb(205, 0, 0)", 2),
+    new Star (350, 175, 3, "rgb(0, 205, 0)", 3)
 ]
 
 stars.forEach((star) => {
