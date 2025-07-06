@@ -34,6 +34,14 @@ export class QuadTree {
         this.divided = false;
         this.collisions = []
     }
+    reset() {
+        this.points = []
+        this.collisions = []
+        this.ne = null;
+        this.nw = null;
+        this.se = null;
+        this.sw = null;
+    }
     subdivide() {
         let { x, y } = this.boundary
         let hw = this.boundary.w / 2
@@ -51,25 +59,57 @@ export class QuadTree {
     }
 
     insert(point) {
-        if (this.boundary.contains(point)) return 0;
+        if (!this.boundary.contains(point)) return 0;
 
         if (this.points.length < this.capacity) {
             this.points.push(point);
         } else {
-            this.divided = true
-            this.subdivide()
-            if (this.nw.intersects(point)) {
+            if (!this.divided) {
+                this.subdivide()
+                this.divided = true
+            }
+            if (this.nw.boundary.intersects(point)) {
                 this.nw.insert(point)
             }
-            if (this.ne.intersects(point)) {
+            else if (this.ne.boundary.intersects(point)) {
                 this.ne.insert(point)
             }
-            if (this.sw.intersects(point)) {
+            else if (this.sw.boundary.intersects(point)) {
                 this.sw.insert(point)
             }
-            if (this.se.intersects(point)) {
+            else if (this.se.boundary.intersects(point)) {
                 this.se.insert(point)
             }
         }
+    }
+    collision(a, b) {
+        let dx = b.x - a.x
+        let dy = b.y - a.y
+        let dist = dx*dx+dy*dy
+        let r = (a.size + b.size) * (a.size + b.size)
+        return dist < r
+    }
+    collisionCheck() {
+        if (this.points.length <= 1) return 0;
+        
+        this.points.forEach((point1) => {
+            let groupCollisions = [point1]
+            for (let i = 0; i < this.points.length; i++) {
+                let point2 = this.points[i]
+                if (point1 === point2) continue;
+
+                if (this.collision(point1, point2) && !groupCollisions.includes(point2)) groupCollisions.push(point2)
+            }
+            if (groupCollisions.length > 1) this.collisions.push(groupCollisions)
+        })
+
+        if (this.divided) {
+            this.nw.collisionCheck()
+            this.ne.collisionCheck()
+            this.sw.collisionCheck()
+            this.se.collisionCheck()
+        }
+
+        return this.collisions
     }
 }
