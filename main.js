@@ -1,6 +1,7 @@
 import { settings } from "./MODULES/global.js";
 import { Star, StarFusePlaceholder } from "./MODULES/ENTITIES/star.js";
 import { Camera } from "./MODULES/camera.js"
+import { DragBox } from "./MODULES/MECHANICS/dragBox.js";
 
 export let playerTeam = 1
 export const cns = document.getElementById("canvas"),
@@ -11,8 +12,12 @@ export let globalUnits = new Map()
 export let globalStars = new Map()
 export let flashes = []
 export let starFuses = []
+let dragBox = null;
 let worldMouseX = null,
-      worldMouseY = null
+      worldMouseY = null;
+    
+let setX = null,
+      setY = null;
 
 let stars = [
     new Star(1500, -1500, 3, "rgb(0, 0, 205)", 1),
@@ -59,9 +64,16 @@ cns.addEventListener('mousemove', function (event) {
     const clampedY = Math.max(-halfMap, Math.min(halfMap, worldY));
     worldMouseX = clampedX
     worldMouseY = clampedY
+    if (dragBox) {
+        dragBox.px2 = worldMouseX-setX
+        dragBox.py2 = worldMouseY-setY
+    }
 });
 document.addEventListener("mousedown", (e) => {
     e.preventDefault()
+    let setX = worldMouseX
+    let setY = worldMouseY
+    dragBox = new DragBox(worldMouseX, worldMouseY, setX, setY, worldMouseX, worldMouseY)
     if (e.button == 2) {
         globalUnits.forEach((unit) => {
             if (unit.team == playerTeam && unit.isSelected) {
@@ -99,6 +111,9 @@ document.addEventListener("mousedown", (e) => {
             if (star.team == playerTeam) star.isSelected = false
         })
     }
+})
+cns.addEventListener("mouseup", () => {
+    dragBox = null
 })
 let speed = 10
 
@@ -201,6 +216,7 @@ function render() {
     globalUnits.forEach((unit) => {
         unit.draw()
     })
+    if (dragBox) { dragBox.draw(); }
 
     requestAnimationFrame(render)
 }
