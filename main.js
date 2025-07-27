@@ -53,7 +53,7 @@ document.addEventListener("keydown", (e) => {
         canSpawnFuse = false
     }
     
-    if (keys[81]) {
+    if (keys[69]) {
         if (selectType == 2) {
             selectType = 0
         } else {
@@ -61,7 +61,7 @@ document.addEventListener("keydown", (e) => {
         }
     }
     
-    if (keys[69]) {
+    if (keys[81]) {
         if (selectType == 0) {
             selectType = 2
         } else {
@@ -97,9 +97,11 @@ cns.addEventListener('mousemove', function (event) {
 });
 document.addEventListener("mousedown", (e) => {
     e.preventDefault()
-    let setX = worldMouseX
-    let setY = worldMouseY
-    dragBox = new DragBox(worldMouseX, worldMouseY, setX, setY, worldMouseX, worldMouseY)
+    if (e.button == 0) {
+        let setX = worldMouseX
+        let setY = worldMouseY
+        dragBox = new DragBox(worldMouseX, worldMouseY, setX, setY, worldMouseX, worldMouseY)
+    }
     if (e.button == 2) {
         globalUnits.forEach((unit) => {
             if (unit.team == playerTeam && unit.isSelected) {
@@ -139,13 +141,35 @@ document.addEventListener("mousedown", (e) => {
     }
 })
 cns.addEventListener("mouseup", () => {
-    dragBox = null
     switch (selectType) {
         case 0: {
+            const left = Math.min(dragBox.px1, dragBox.px2);
+            const right = Math.max(dragBox.px1, dragBox.px2);
+            const top = Math.min(dragBox.py1, dragBox.py2);
+            const bottom = Math.max(dragBox.py1, dragBox.py2);
             let units = [...globalUnits].filter(([id]) => id.startsWith(playerTeam))
-            star
+            globalStars.forEach((star) => {
+                if (star.team == playerTeam) {
+                    units.forEach(([id, unit]) => {
+                        let cX = Math.max(left, Math.min(unit.x, right))
+                        let cY = Math.max(top, Math.min(unit.y, bottom))
+
+                        let dx = unit.x - cX
+                        let dy = unit.y - cY
+                        let dist = dx*dx+dy*dy
+                        let r = unit.size*unit.size
+
+                        if (dist <= r) {
+                            unit.isSelected = true
+                            console.log(unit)
+                        }
+                    })
+                }
+            })
         }
+        break;
     }
+    dragBox = null
 })
 let speed = 10
 

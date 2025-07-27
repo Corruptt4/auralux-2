@@ -98,6 +98,7 @@ export class Star {
                 let unit = new Unit(this.x + this.size*Math.cos(ang+this.offsetAngle), this.y+this.size*Math.sin(ang+this.offsetAngle), this.team, this.color)
                 unit.ang = ang + this.offsetAngle
                 unit.mouseSelectedTarget = true;
+                unit.parentStar = this
                 globalUnits.set(unit.id, unit)
             }
         }

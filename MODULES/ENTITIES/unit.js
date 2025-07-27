@@ -14,6 +14,7 @@ export class Unit {
         this.idleTick = 80
         this.size = 6
         this.xp = 1.5
+        this.parentStar;
         this.segments = 3
         this.isInFusion;
         this.sentToFuse = false;
@@ -60,7 +61,7 @@ export class Unit {
             this.idleTick--
             if (this.idleTick <= 0) {
                 this.idleTick = 80
-                this.ang = Math.random() * (Math.PI * 2)
+                this.ang = Math.atan2(this.parentStar.y - this.y, this.parentStar.x - this.x) + Math.PI / 2 * Math.random()
                 if (this.speed < 0.02) {
                     this.speed = this.maxSpeed
                 }
