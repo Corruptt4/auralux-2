@@ -2,11 +2,21 @@ import { settings } from "./MODULES/global.js";
 import { Star, StarFusePlaceholder } from "./MODULES/ENTITIES/star.js";
 import { Camera } from "./MODULES/camera.js"
 import { DragBox } from "./MODULES/MECHANICS/dragBox.js";
+import { SelectType } from "./MODULES/UI.js"
 
 export let playerTeam = 1
 export const cns = document.getElementById("canvas"),
                           ctx = cns.getContext("2d"),
                           frictionFactor = 0.94
+
+export let selectType = 0
+
+let selectTypeBox = new SelectType(10, 10, 50, selectType)
+/** SELECT TYPE:
+ * 0 - UNITS
+ * 1 - STARS
+ * 2 - ALL
+ */
 
 export let globalUnits = new Map()
 export let globalStars = new Map()
@@ -41,6 +51,22 @@ document.addEventListener("keydown", (e) => {
         let blueTeamFusing = new StarFusePlaceholder(worldMouseX, worldMouseY, 4, playerTeam, "rgb(0, 0, 205)")
         starFuses.push(blueTeamFusing)
         canSpawnFuse = false
+    }
+    
+    if (keys[81]) {
+        if (selectType == 2) {
+            selectType = 0
+        } else {
+            selectType++
+        }
+    }
+    
+    if (keys[69]) {
+        if (selectType == 0) {
+            selectType = 2
+        } else {
+            selectType--
+        }
     }
 })
 document.addEventListener("keyup", (e) => {
@@ -114,10 +140,18 @@ document.addEventListener("mousedown", (e) => {
 })
 cns.addEventListener("mouseup", () => {
     dragBox = null
+    switch (selectType) {
+        case 0: {
+            let units = [...globalUnits].filter(([id]) => id.startsWith(playerTeam))
+            star
+        }
+    }
 })
 let speed = 10
 
 setInterval(() => {
+    
+    selectTypeBox.selectType = selectType
     if (keys[37] || keys[65]) {
         camera.x -= speed/camera.zoom
     }
@@ -130,6 +164,7 @@ setInterval(() => {
     if (keys[40] || keys[83]) {
         camera.y += speed/camera.zoom
     }
+
     if (keys[84]) {
         globalUnits.forEach((unit) => {
             if (unit.team == playerTeam) unit.isSelected = true
@@ -202,7 +237,7 @@ function render() {
     ctx.clearRect(0, 0, cns.width, cns.height)
     cns.width = window.innerWidth
     cns.height = window.innerHeight
-
+    ctx.save()
     camera.apply()
     flashes.forEach((flash) => {
         flash.draw()
@@ -217,6 +252,9 @@ function render() {
         unit.draw()
     })
     if (dragBox) { dragBox.draw(); }
+
+    ctx.restore()
+    selectTypeBox.draw()
 
     requestAnimationFrame(render)
 }
