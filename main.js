@@ -161,11 +161,31 @@ cns.addEventListener("mouseup", () => {
 
                         if (dist <= r) {
                             unit.isSelected = true
-                            console.log(unit)
                         }
                     })
                 }
             })
+        }
+        break;
+        case 1: {
+                const left = Math.min(dragBox.px1, dragBox.px2);
+                const right = Math.max(dragBox.px1, dragBox.px2);
+                const top = Math.min(dragBox.py1, dragBox.py2);
+                const bottom = Math.max(dragBox.py1, dragBox.py2);
+                let stars = [...globalStars].filter(([id]) => id.startsWith(playerTeam))
+                stars.forEach(([id, star]) => {
+                    let cX = Math.max(left, Math.min(star.x, right))
+                    let cY = Math.max(top, Math.min(star.y, bottom))
+
+                    let dx = star.x-cX
+                    let dy = star.y-cY
+                    let dist = dx*dx+dy*dy
+                    let r = star.size*star.size
+
+                    if (dist <= r) {
+                        star.isSelected = true
+                    }
+                })
         }
         break;
     }
